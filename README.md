@@ -7,8 +7,11 @@ endpoint and ask questions in plain language — *"which IPs are free in the ser
 subnet?"*, *"what is 10.20.30.7?"* — against live IPAM data. Nobody installs anything
 locally, and the token never leaves the server.
 
-> Running in production on the infrastructure team of a national telecom operator.
+> Running in production on a telecom infrastructure engineering team.
 > Five tools, one systemd unit, zero client-side setup.
+>
+> **Design notes:** [Your MCP server should probably not be a subprocess](docs/why-http-not-stdio.md)
+> — why HTTP instead of stdio, what that costs, and why the error strings are prompts.
 
 ---
 
