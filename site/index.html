@@ -138,6 +138,18 @@
   footer{padding:40px 0 56px;color:var(--faint);font-size:.86rem}
   footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
   footer a{color:var(--dim)}
+
+  /* language switch — same component as the rest of the portfolio */
+  .lang-switch{position:fixed;top:14px;right:14px;z-index:9999;display:flex;gap:2px;
+    padding:3px;border-radius:999px;background:rgba(127,127,127,.16);
+    backdrop-filter:blur(6px);font-size:11px;font-weight:600;letter-spacing:.5px}
+  .lang-btn{all:unset;cursor:pointer;padding:5px 11px;border-radius:999px;
+    color:currentColor;opacity:.55;transition:opacity .15s,background .15s}
+  .lang-btn:hover{opacity:.85}
+  .lang-btn.on{opacity:1;background:rgba(127,127,127,.28)}
+  @media print{.lang-switch{display:none}}
+  /* keep the sticky nav clear of the switch on narrow viewports */
+  @media(max-width:980px){nav .wrap{padding-right:104px}}
 </style>
 
 <meta property="og:title" content="netbox-mcp — one MCP server, a whole team&#x27;s IPAM">
@@ -154,50 +166,57 @@
 </head>
 <body>
 
+<div class="lang-switch">
+  <button class="lang-btn on" data-l="en" type="button">EN</button>
+  <button class="lang-btn" data-l="es" type="button">ES</button>
+</div>
+
 <nav><div class="wrap">
   <div class="brand"><b>netbox</b>-mcp</div>
   <div class="links">
-    <a href="#problem">Problem</a>
-    <a href="#demo">Demo</a>
-    <a href="#design">Design</a>
-    <a href="#tools">Tools</a>
-    <a href="#install">Install</a>
+    <a href="#problem" data-i18n="n1">Problem</a>
+    <a href="#demo" data-i18n="n2">Demo</a>
+    <a href="#design" data-i18n="n3">Design</a>
+    <a href="#tools" data-i18n="n4">Tools</a>
+    <a href="#install" data-i18n="n5">Install</a>
+    <a href="https://proyectos-msemino.vercel.app" data-i18n="n6">◂ All projects</a>
     <a class="gh" href="https://github.com/msemino/netbox-mcp">GitHub →</a>
   </div>
 </div></nav>
 
 <header><div class="wrap">
-  <div class="eyebrow">Model Context Protocol · read-only · HTTP</div>
-  <h1>One MCP server.<br>A whole team's <span class="g">live IPAM</span>.</h1>
-  <p class="lede">Engineers ask their AI assistant which IPs are free in a subnet, and it answers from NetBox — right now, not from a stale copy in a wiki. Nobody installs anything. The API token never leaves the server.</p>
-  <div class="prod"><span class="dot"></span> In production on the infrastructure team of a national telecom operator</div>
+  <div class="eyebrow" data-i18n="k1">Model Context Protocol · read-only · HTTP</div>
+  <h1 data-i18n="k2">One MCP server.<br>A whole team's <span class="g">live IPAM</span>.</h1>
+  <p class="lede" data-i18n="k3">Engineers ask their AI assistant which IPs are free in a subnet, and it answers from NetBox — right now, not from a stale copy in a wiki. Nobody installs anything. The API token never leaves the server.</p>
+  <div class="prod" data-i18n="k4"><span class="dot"></span> In production on a telecom infrastructure engineering team</div>
   <div class="cta">
-    <a class="btn p" href="https://github.com/msemino/netbox-mcp">View source</a>
-    <a class="btn s" href="#demo">See it answer</a>
+    <a class="btn p" href="https://github.com/msemino/netbox-mcp" data-i18n="k5">View source</a>
+    <a class="btn s" href="#demo" data-i18n="k6">See it answer</a>
+    <a class="btn s" href="https://proyectos-msemino.vercel.app" data-i18n="k7">All projects</a>
   </div>
 </div></header>
 
 <section id="problem"><div class="wrap">
-  <h2>The gap between what you know and what is true</h2>
-  <p class="sub">Infrastructure teams keep two kinds of knowledge, and they rot in different ways.</p>
+  <h2 data-i18n="k8">The gap between what you know and what is true</h2>
+  <p class="sub" data-i18n="k9">Infrastructure teams keep two kinds of knowledge, and they rot in different ways.</p>
 
-  <p><strong>Structured data</strong> — subnets, addresses, VLANs — lives in NetBox. Accurate, queryable, and reachable only through a web UI or a REST API. Mid-incident, an engineer opens a browser tab and squints.</p>
-  <p><strong>Narrative knowledge</strong> — runbooks, incident write-ups, the reason a VLAN exists — lives in a wiki. Engineers now read this through AI assistants, which is fast and pleasant.</p>
-  <p>So the assistant can reason about <em>why</em> the network looks like it does, but cannot see <em>what it currently is</em>.</p>
+  <p data-i18n="k10"><strong>Structured data</strong> — subnets, addresses, VLANs — lives in NetBox. Accurate, queryable, and reachable only through a web UI or a REST API. Mid-incident, an engineer opens a browser tab and squints.</p>
+  <p data-i18n="k11"><strong>Narrative knowledge</strong> — runbooks, incident write-ups, the reason a VLAN exists — lives in a wiki. Engineers now read this through AI assistants, which is fast and pleasant.</p>
+  <p data-i18n="k12">So the assistant can reason about <em>why</em> the network looks like it does, but cannot see <em>what it currently is</em>.</p>
 
   <div class="split">
     <div class="pane bad">
-      <div class="tag">The tempting fix</div>
-      <p>Copy the IP addresses into the documentation, so the assistant can read them.</p>
-      <div class="snip">docs/network.md<br>
+      <div class="tag" data-i18n="k13">The tempting fix</div>
+      <p data-i18n="k14">Copy the IP addresses into the documentation, so the assistant can read them.</p>
+      <div class="snip" data-i18n="k15">docs/network.md<br>
         <span style="color:var(--bad)">10.20.30.7 — mail relay</span><br>
         <span style="color:var(--faint)">// reassigned in March.</span><br>
         <span style="color:var(--faint)">// nobody noticed.</span></div>
     </div>
     <div class="pane good">
-      <div class="tag">What this does instead</div>
-      <p>Give the assistant a way to ask the source of truth directly, at the moment the question is asked.</p>
-      <div class="snip">docs/network.md<br>
+      <div class="tag" data-i18n="k16">What this does instead</div>
+      <p data-i18n="k17">Give the assistant a way to ask the source of truth directly, at the moment the question is asked.</p>
+      <div class="snip" data-i18n="k18">docs/network.md<br>
         <span style="color:var(--acc)">see NetBox → VLAN 41</span><br>
         <span style="color:var(--faint)">// always current.</span><br>
         <span style="color:var(--faint)">// or it says it can't reach it.</span></div>
@@ -205,13 +224,13 @@
   </div>
 
   <div class="callout">
-    <p><strong>A copied live value goes stale silently.</strong> That is the whole argument. Six months later the assistant confidently quotes an address that was reassigned in March, and it has no way to know it is wrong. A tool call either returns today's answer or fails loudly.</p>
+    <p data-i18n="k19"><strong>A copied live value goes stale silently.</strong> That is the whole argument. Six months later the assistant confidently quotes an address that was reassigned in March, and it has no way to know it is wrong. A tool call either returns today's answer or fails loudly.</p>
   </div>
 </div></section>
 
 <section id="demo"><div class="wrap">
-  <h2>What it looks like in use</h2>
-  <p class="sub">Real tools, real shapes. Pick a question.</p>
+  <h2 data-i18n="k20">What it looks like in use</h2>
+  <p class="sub" data-i18n="k21">Real tools, real shapes. Pick a question.</p>
 
   <div class="demo">
     <div class="bar"><span class="c"></span><span class="c"></span><span class="c"></span>
@@ -219,14 +238,14 @@
     <div class="body" id="body"></div>
     <div class="foot" id="chips"></div>
   </div>
-  <p style="font-size:.88rem;color:var(--faint)">Addresses shown are from an illustrative lab range, not any production network.</p>
+  <p style="font-size:.88rem;color:var(--faint)" data-i18n="k22">Addresses shown are from an illustrative lab range, not any production network.</p>
 </div></section>
 
 <section id="design"><div class="wrap">
-  <h2>Why HTTP, and why one server</h2>
-  <p class="sub">The default way to ship MCP is stdio. For a team, that is a security posture, not a convenience choice.</p>
+  <h2 data-i18n="k23">Why HTTP, and why one server</h2>
+  <p class="sub" data-i18n="k24">The default way to ship MCP is stdio. For a team, that is a security posture, not a convenience choice.</p>
 
-  <p>With stdio, the assistant spawns the process locally. Every engineer installs Python, clones a repo, and pastes an API token into a config file on their laptop. Now the token exists on <em>N</em> laptops. Rotating it means chasing <em>N</em> people. Revoking access for someone who left means hoping they deleted a dotfile.</p>
+  <p data-i18n="k25">With stdio, the assistant spawns the process locally. Every engineer installs Python, clones a repo, and pastes an API token into a config file on their laptop. Now the token exists on <em>N</em> laptops. Rotating it means chasing <em>N</em> people. Revoking access for someone who left means hoping they deleted a dotfile.</p>
 
   <div class="arch">
     <svg viewBox="0 0 760 250" xmlns="http://www.w3.org/2000/svg" font-family="var(--mono)">
@@ -236,19 +255,19 @@
         </marker>
       </defs>
       <!-- clients -->
-      <text x="76" y="26" fill="#5f7a76" font-size="11" text-anchor="middle">ENGINEERS</text>
+      <text x="76" y="26" fill="#5f7a76" font-size="11" text-anchor="middle" data-i18n="s1">ENGINEERS</text>
       <g fill="#111d21" stroke="#1f3239">
         <rect x="16" y="42" width="120" height="34" rx="5"/>
         <rect x="16" y="90" width="120" height="34" rx="5"/>
         <rect x="16" y="138" width="120" height="34" rx="5"/>
       </g>
       <g fill="#8ba7a2" font-size="11.5" text-anchor="middle">
-        <text x="76" y="63">AI assistant</text>
-        <text x="76" y="111">AI assistant</text>
-        <text x="76" y="159">AI assistant</text>
+        <text x="76" y="63" data-i18n="s2">AI assistant</text>
+        <text x="76" y="111" data-i18n="s3">AI assistant</text>
+        <text x="76" y="159" data-i18n="s4">AI assistant</text>
       </g>
-      <text x="76" y="196" fill="#5f7a76" font-size="10.5" text-anchor="middle">no token</text>
-      <text x="76" y="211" fill="#5f7a76" font-size="10.5" text-anchor="middle">no install</text>
+      <text x="76" y="196" fill="#5f7a76" font-size="10.5" text-anchor="middle" data-i18n="s5">no token</text>
+      <text x="76" y="211" fill="#5f7a76" font-size="10.5" text-anchor="middle" data-i18n="s6">no install</text>
 
       <!-- arrows in -->
       <g stroke="#4fd1c0" stroke-width="1.4" fill="none" marker-end="url(#a)" opacity=".85">
@@ -256,73 +275,73 @@
         <path class="flow" d="M140,107 L268,107"/>
         <path class="flow" d="M140,155 C200,155 210,114 268,109"/>
       </g>
-      <text x="204" y="88" fill="#5f7a76" font-size="10" text-anchor="middle">HTTP /mcp</text>
+      <text x="204" y="88" fill="#5f7a76" font-size="10" text-anchor="middle" data-i18n="s7">HTTP /mcp</text>
 
       <!-- server -->
       <rect x="272" y="60" width="196" height="96" rx="7" fill="#111d21" stroke="#4fd1c0" stroke-opacity=".5"/>
       <text x="370" y="86" fill="#dbe9e6" font-size="13" text-anchor="middle" font-weight="600">netbox-mcp</text>
-      <text x="370" y="106" fill="#5f7a76" font-size="10.5" text-anchor="middle">systemd · one process</text>
+      <text x="370" y="106" fill="#5f7a76" font-size="10.5" text-anchor="middle" data-i18n="s8">systemd · one process</text>
       <rect x="296" y="118" width="148" height="24" rx="4" fill="#0a1417" stroke="#2f665d"/>
-      <text x="370" y="134" fill="#4fd1c0" font-size="10.5" text-anchor="middle">NETBOX_TOKEN (read-only)</text>
-      <text x="370" y="176" fill="#5f7a76" font-size="10.5" text-anchor="middle">the token lives here.</text>
-      <text x="370" y="191" fill="#5f7a76" font-size="10.5" text-anchor="middle">exactly here.</text>
+      <text x="370" y="134" fill="#4fd1c0" font-size="10.5" text-anchor="middle" data-i18n="s9">NETBOX_TOKEN (read-only)</text>
+      <text x="370" y="176" fill="#5f7a76" font-size="10.5" text-anchor="middle" data-i18n="s10">the token lives here.</text>
+      <text x="370" y="191" fill="#5f7a76" font-size="10.5" text-anchor="middle" data-i18n="s11">exactly here.</text>
 
       <!-- arrow out -->
       <path class="flow" d="M472,108 L588,108" stroke="#4fd1c0" stroke-width="1.4" fill="none" marker-end="url(#a)" opacity=".85"/>
-      <text x="530" y="98" fill="#5f7a76" font-size="10" text-anchor="middle">GET only</text>
+      <text x="530" y="98" fill="#5f7a76" font-size="10" text-anchor="middle" data-i18n="s12">GET only</text>
 
       <!-- netbox -->
       <rect x="592" y="66" width="152" height="84" rx="7" fill="#111d21" stroke="#1f3239"/>
       <text x="668" y="98" fill="#dbe9e6" font-size="13" text-anchor="middle" font-weight="600">NetBox</text>
-      <text x="668" y="118" fill="#5f7a76" font-size="10.5" text-anchor="middle">IPAM / DCIM</text>
-      <text x="668" y="134" fill="#5f7a76" font-size="10.5" text-anchor="middle">source of truth</text>
+      <text x="668" y="118" fill="#5f7a76" font-size="10.5" text-anchor="middle" data-i18n="s13">IPAM / DCIM</text>
+      <text x="668" y="134" fill="#5f7a76" font-size="10.5" text-anchor="middle" data-i18n="s14">source of truth</text>
     </svg>
   </div>
 
-  <p>Serving MCP over HTTP inverts every one of those properties:</p>
+  <p data-i18n="k26">Serving MCP over HTTP inverts every one of those properties:</p>
   <ul>
-    <li><strong>The token lives in exactly one place</strong> — an <code>EnvironmentFile</code> readable only by the service user. It never reaches a client.</li>
-    <li><strong>Onboarding is a URL.</strong> A new engineer adds one line to their assistant config.</li>
-    <li><strong>Offboarding is a firewall rule</strong>, not a trust exercise.</li>
-    <li><strong>Tools are versioned centrally.</strong> Fix a query once, everyone gets the fix.</li>
+    <li data-i18n="k27"><strong>The token lives in exactly one place</strong> — an <code>EnvironmentFile</code> readable only by the service user. It never reaches a client.</li>
+    <li data-i18n="k28"><strong>Onboarding is a URL.</strong> A new engineer adds one line to their assistant config.</li>
+    <li data-i18n="k29"><strong>Offboarding is a firewall rule</strong>, not a trust exercise.</li>
+    <li data-i18n="k30"><strong>Tools are versioned centrally.</strong> Fix a query once, everyone gets the fix.</li>
   </ul>
 
   <div class="callout warn">
-    <p><strong>The trade-off, stated plainly.</strong> The endpoint is now a network service and must be treated as one. It listens on an internal network or a private mesh — never the public internet — and it carries no authentication of its own. Network reachability <em>is</em> the access control. If that assumption does not hold for you, put it behind a reverse proxy with auth.</p>
+    <p data-i18n="k31"><strong>The trade-off, stated plainly.</strong> The endpoint is now a network service and must be treated as one. It listens on an internal network or a private mesh — never the public internet — and it carries no authentication of its own. Network reachability <em>is</em> the access control. If that assumption does not hold for you, put it behind a reverse proxy with auth.</p>
   </div>
 
-  <h3>Read-only by construction, not by convention</h3>
-  <p>The single HTTP helper in this server issues <code>GET</code> and nothing else. There is no code path that writes to NetBox, so an assistant cannot be talked into deleting a prefix, however the prompt is phrased.</p>
-  <p>Pair that with a <strong>read-only NetBox token</strong> and the property survives a bug. Two independent mechanisms, because one of them will eventually be a mistake.</p>
+  <h3 data-i18n="k32">Read-only by construction, not by convention</h3>
+  <p data-i18n="k33">The single HTTP helper in this server issues <code>GET</code> and nothing else. There is no code path that writes to NetBox, so an assistant cannot be talked into deleting a prefix, however the prompt is phrased.</p>
+  <p data-i18n="k34">Pair that with a <strong>read-only NetBox token</strong> and the property survives a bug. Two independent mechanisms, because one of them will eventually be a mistake.</p>
 
-  <h3>Failure is a sentence, not a stack trace</h3>
-  <p>An unguarded MCP tool hands the assistant a Python traceback, and the assistant hands the operator a shrug. Every tool here is wrapped so transport failures come back as something a human can act on:</p>
+  <h3 data-i18n="k35">Failure is a sentence, not a stack trace</h3>
+  <p data-i18n="k36">An unguarded MCP tool hands the assistant a Python traceback, and the assistant hands the operator a shrug. Every tool here is wrapped so transport failures come back as something a human can act on:</p>
   <pre><code>NetBox rejected the token (401/403). Check NETBOX_TOKEN.
 NetBox is unreachable at http://netbox.internal:8090 (Connection refused).
 NetBox did not answer within 20s.</code></pre>
-  <p>This matters more than it sounds. An incident is exactly when your tooling is most likely to be degraded, and exactly when a confusing error costs the most.</p>
+  <p data-i18n="k37">This matters more than it sounds. An incident is exactly when your tooling is most likely to be degraded, and exactly when a confusing error costs the most.</p>
 </div></section>
 
 <section id="tools"><div class="wrap">
-  <h2>Five tools</h2>
-  <p class="sub">The docstring is the interface — the assistant reads it to choose. Each is written for someone who has never seen NetBox, with a concrete example.</p>
+  <h2 data-i18n="k38">Five tools</h2>
+  <p class="sub" data-i18n="k39">The docstring is the interface — the assistant reads it to choose. Each is written for someone who has never seen NetBox, with a concrete example.</p>
   <table class="tbl">
-    <thead><tr><th>Tool</th><th>What it answers</th></tr></thead>
+    <thead><tr><th data-i18n="k40">Tool</th><th data-i18n="k41">What it answers</th></tr></thead>
     <tbody>
-      <tr><td>list_prefixes</td><td>Every documented subnet, with its VLAN and description.</td></tr>
-      <tr><td>prefix_report</td><td>For one subnet: how many IPs are documented, and the first free ones.</td></tr>
-      <tr><td>find_ip</td><td>Search by DNS name, description or address fragment.</td></tr>
-      <tr><td>subnet_contents</td><td>Every documented IP inside a subnet, in address order.</td></tr>
-      <tr><td>list_vlans</td><td>Known VLANs, ordered by VLAN ID.</td></tr>
+      <tr><td>list_prefixes</td><td data-i18n="k42">Every documented subnet, with its VLAN and description.</td></tr>
+      <tr><td>prefix_report</td><td data-i18n="k43">For one subnet: how many IPs are documented, and the first free ones.</td></tr>
+      <tr><td>find_ip</td><td data-i18n="k44">Search by DNS name, description or address fragment.</td></tr>
+      <tr><td>subnet_contents</td><td data-i18n="k45">Every documented IP inside a subnet, in address order.</td></tr>
+      <tr><td>list_vlans</td><td data-i18n="k46">Known VLANs, ordered by VLAN ID.</td></tr>
     </tbody>
   </table>
-  <h3>Adding one is a decorated function</h3>
-  <p>Three rules keep the assistant using it correctly: <strong>GET only</strong> (the read-only guarantee is the whole security model); <strong>the docstring is the API</strong> (write it for someone who does not know your schema); and <strong>return text a human could read</strong>, not JSON — the assistant will paraphrase it anyway, and readable output makes a hallucinated field obvious.</p>
+  <h3 data-i18n="k47">Adding one is a decorated function</h3>
+  <p data-i18n="k48">Three rules keep the assistant using it correctly: <strong>GET only</strong> (the read-only guarantee is the whole security model); <strong>the docstring is the API</strong> (write it for someone who does not know your schema); and <strong>return text a human could read</strong>, not JSON — the assistant will paraphrase it anyway, and readable output makes a hallucinated field obvious.</p>
 </div></section>
 
 <section id="install"><div class="wrap">
-  <h2>Install</h2>
-  <p class="sub">Python 3.10+, a reachable NetBox, and a read-only API token.</p>
+  <h2 data-i18n="k49">Install</h2>
+  <p class="sub" data-i18n="k50">Python 3.10+, a reachable NetBox, and a read-only API token.</p>
   <pre><code>git clone https://github.com/msemino/netbox-mcp
 cd netbox-mcp
 python3 -m venv venv && ./venv/bin/pip install -r requirements.txt
@@ -330,18 +349,19 @@ python3 -m venv venv && ./venv/bin/pip install -r requirements.txt
 cp .env.example .env    # set NETBOX_URL and a read-only NETBOX_TOKEN
 chmod 600 .env
 set -a && . ./.env && set +a && ./venv/bin/python src/server.py</code></pre>
-  <p>Then point an assistant at it:</p>
+  <p data-i18n="k51">Then point an assistant at it:</p>
   <pre><code>claude mcp add --transport http netbox http://netbox-mcp.internal:8097/mcp</code></pre>
-  <p>A systemd unit with a hardened sandbox ships in <code>deploy/</code>.</p>
+  <p data-i18n="k52">A systemd unit with a hardened sandbox ships in <code>deploy/</code>.</p>
 </div></section>
 
 <footer><div class="wrap">
-  <div>Built by <a href="https://github.com/msemino">Marcelo Semino</a> · MIT licensed</div>
-  <div><a href="https://proyectos-msemino.vercel.app">← all projects</a> · <a href="https://github.com/msemino/netbox-mcp">source</a></div>
+  <div data-i18n="k53">Built by <a href="https://github.com/msemino">Marcelo Semino</a> · MIT licensed</div>
+  <div data-i18n="k54"><a href="https://proyectos-msemino.vercel.app">← all projects</a> · <a href="https://github.com/msemino/netbox-mcp">source</a></div>
 </div></footer>
 
 <script>
-const SCENES = [
+/* Tool output stays in English on purpose: it is the server's literal response. */
+const SCENES_EN = [
   {
     q: "Which IPs are free in the server subnet?",
     tool: 'prefix_report(prefix="10.20.30.0/24")',
@@ -366,6 +386,7 @@ First free IPs: 10.20.30.41, 10.20.30.42, 10.20.30.57`,
   },
   {
     q: "(NetBox is down)",
+    chip: "when NetBox is down",
     tool: 'list_vlans()',
     out: `NetBox is unreachable at http://netbox.internal:8090
 (Connection refused).`,
@@ -373,6 +394,124 @@ First free IPs: 10.20.30.41, 10.20.30.42, 10.20.30.57`,
     fail: true
   }
 ];
+
+const SCENES_ES = [
+  {
+    q: "¿Qué IPs están libres en la subred de servidores?",
+    tool: 'prefix_report(prefix="10.20.30.0/24")',
+    out: SCENES_EN[0].out,
+    a: "El segmento de servidores tiene 74 direcciones documentadas. Las próximas libres son .41, .42 y .57 — .41 es la más baja, así que tomá esa salvo que quieras mantener un bloque contiguo."
+  },
+  {
+    q: "¿Qué es 10.20.30.7?",
+    tool: 'find_ip(query="10.20.30.7")',
+    out: SCENES_EN[1].out,
+    a: "Es monitor.lab.internal, el servidor de monitoreo del lado de networking. Está documentado, así que no es un host colado."
+  },
+  {
+    q: "Listá todas las subredes que mencionen wireless.",
+    tool: 'list_prefixes()',
+    out: SCENES_EN[2].out,
+    a: "Tres: corporativa en la VLAN 41, invitados en la 42, y la red de gestión de los APs en la 43. Los APs viven en la 43, no en las SSID que sirven."
+  },
+  {
+    q: "(NetBox está caído)",
+    chip: "cuando NetBox está caído",
+    tool: 'list_vlans()',
+    out: SCENES_EN[3].out,
+    a: "No puedo llegar a NetBox ahora mismo — la conexión es rechazada, así que el servicio probablemente esté caído y no lento. No voy a adivinar números de VLAN. Revisá el contenedor de NetBox antes de confiar en cualquier dirección que te haya dado antes en esta sesión.",
+    fail: true
+  }
+];
+
+const ES = {
+  n1:"Problema", n2:"Demo", n3:"Diseño", n4:"Herramientas", n5:"Instalación",
+  n6:"◂ Todos los proyectos",
+
+  k1:"Model Context Protocol · solo lectura · HTTP",
+  k2:"Un servidor MCP.<br>El <span class=\"g\">IPAM en vivo</span> de todo un equipo.",
+  k3:"Los ingenieros le preguntan a su asistente de IA qué IPs están libres en una subred, y responde desde NetBox — ahora mismo, no desde una copia vieja en una wiki. Nadie instala nada. El token de la API nunca sale del servidor.",
+  k4:"<span class=\"dot\"></span> En producción en un equipo de ingeniería de infraestructura de telecomunicaciones",
+  k5:"Ver el código", k6:"Miralo responder", k7:"Todos los proyectos",
+
+  k8:"La brecha entre lo que sabés y lo que es verdad",
+  k9:"Los equipos de infraestructura guardan dos tipos de conocimiento, y se pudren de maneras distintas.",
+  k10:"<strong>Los datos estructurados</strong> — subredes, direcciones, VLANs — viven en NetBox. Exactos, consultables, y accesibles solo por una interfaz web o una API REST. En medio de un incidente, alguien abre una pestaña del navegador y entrecierra los ojos.",
+  k11:"<strong>El conocimiento narrativo</strong> — runbooks, informes de incidentes, la razón por la que existe una VLAN — vive en una wiki. Hoy los ingenieros la leen a través de asistentes de IA, lo cual es rápido y cómodo.",
+  k12:"Así, el asistente puede razonar sobre <em>por qué</em> la red es como es, pero no puede ver <em>qué es en este momento</em>.",
+  k13:"El arreglo tentador",
+  k14:"Copiar las direcciones IP a la documentación, para que el asistente pueda leerlas.",
+  k15:"docs/network.md<br><span style=\"color:var(--bad)\">10.20.30.7 — relay de correo</span><br><span style=\"color:var(--faint)\">// reasignada en marzo.</span><br><span style=\"color:var(--faint)\">// nadie se dio cuenta.</span>",
+  k16:"Lo que esto hace en cambio",
+  k17:"Darle al asistente una forma de preguntarle directo a la fuente de verdad, en el momento exacto en que se hace la pregunta.",
+  k18:"docs/network.md<br><span style=\"color:var(--acc)\">ver NetBox → VLAN 41</span><br><span style=\"color:var(--faint)\">// siempre actual.</span><br><span style=\"color:var(--faint)\">// o avisa que no llega.</span>",
+  k19:"<strong>Un valor vivo copiado envejece en silencio.</strong> Ese es todo el argumento. Seis meses después el asistente cita con total seguridad una dirección que se reasignó en marzo, y no tiene manera de saber que está equivocado. Una llamada a la herramienta devuelve la respuesta de hoy, o falla de manera ruidosa.",
+
+  k20:"Cómo se ve en uso",
+  k21:"Herramientas reales, formas reales. Elegí una pregunta.",
+  k22:"Las direcciones que se muestran son de un rango de laboratorio ilustrativo, no de ninguna red en producción.",
+
+  k23:"Por qué HTTP, y por qué un solo servidor",
+  k24:"La forma por defecto de publicar MCP es stdio. Para un equipo, eso es una postura de seguridad, no una decisión de comodidad.",
+  k25:"Con stdio, el asistente levanta el proceso localmente. Cada ingeniero instala Python, clona un repo y pega un token de API en un archivo de configuración de su laptop. Ahora el token existe en <em>N</em> laptops. Rotarlo significa perseguir a <em>N</em> personas. Revocarle el acceso a alguien que se fue significa confiar en que borró un dotfile.",
+  k26:"Servir MCP sobre HTTP invierte cada una de esas propiedades:",
+  k27:"<strong>El token vive en exactamente un lugar</strong> — un <code>EnvironmentFile</code> legible solo por el usuario del servicio. Nunca llega a un cliente.",
+  k28:"<strong>El onboarding es una URL.</strong> Un ingeniero nuevo agrega una línea a la configuración de su asistente.",
+  k29:"<strong>El offboarding es una regla de firewall</strong>, no un ejercicio de confianza.",
+  k30:"<strong>Las herramientas se versionan de forma centralizada.</strong> Arreglás una consulta una vez, y la recibe todo el mundo.",
+  k31:"<strong>El trade-off, dicho sin vueltas.</strong> El endpoint ahora es un servicio de red y hay que tratarlo como tal. Escucha en una red interna o en una malla privada — nunca en la internet pública — y no tiene autenticación propia. La alcanzabilidad de red <em>es</em> el control de acceso. Si ese supuesto no se sostiene en tu caso, ponelo detrás de un reverse proxy con autenticación.",
+  k32:"Solo lectura por construcción, no por convención",
+  k33:"El único helper HTTP de este servidor emite <code>GET</code> y nada más. No hay camino de código que escriba en NetBox, así que a un asistente no se lo puede convencer de borrar un prefijo, sin importar cómo esté formulado el prompt.",
+  k34:"Combinalo con un <strong>token de NetBox de solo lectura</strong> y la propiedad sobrevive a un bug. Dos mecanismos independientes, porque uno de los dos va a ser un error tarde o temprano.",
+  k35:"Fallar es una oración, no un stack trace",
+  k36:"Una tool MCP sin guarda le entrega al asistente un traceback de Python, y el asistente le entrega al operador un encogimiento de hombros. Acá cada tool está envuelta para que las fallas de transporte vuelvan como algo sobre lo que un humano pueda actuar:",
+  k37:"Esto importa más de lo que suena. Un incidente es justo el momento en que tu herramienta tiene más chances de estar degradada, y justo cuando un error confuso sale más caro.",
+
+  k38:"Cinco herramientas",
+  k39:"El docstring es la interfaz — el asistente lo lee para elegir. Cada uno está escrito para alguien que nunca vio NetBox, con un ejemplo concreto.",
+  k40:"Herramienta", k41:"Qué responde",
+  k42:"Cada subred documentada, con su VLAN y su descripción.",
+  k43:"Para una subred: cuántas IPs están documentadas, y las primeras libres.",
+  k44:"Búsqueda por nombre DNS, descripción o fragmento de dirección.",
+  k45:"Cada IP documentada dentro de una subred, en orden de dirección.",
+  k46:"Las VLANs conocidas, ordenadas por VLAN ID.",
+  k47:"Agregar una es una función decorada",
+  k48:"Tres reglas mantienen al asistente usándola bien: <strong>solo GET</strong> (la garantía de solo lectura es todo el modelo de seguridad); <strong>el docstring es la API</strong> (escribilo para alguien que no conoce tu esquema); y <strong>devolvé texto que un humano pueda leer</strong>, no JSON — el asistente lo va a parafrasear igual, y una salida legible hace obvio un campo alucinado.",
+
+  k49:"Instalación",
+  k50:"Python 3.10+, un NetBox alcanzable, y un token de API de solo lectura.",
+  k51:"Después apuntá un asistente hacia él:",
+  k52:"En <code>deploy/</code> viene una unidad de systemd con un sandbox endurecido.",
+  k53:"Hecho por <a href=\"https://github.com/msemino\">Marcelo Semino</a> · licencia MIT",
+  k54:"<a href=\"https://proyectos-msemino.vercel.app\">← todos los proyectos</a> · <a href=\"https://github.com/msemino/netbox-mcp\">código</a>",
+
+  s1:"INGENIEROS", s2:"asistente de IA", s3:"asistente de IA", s4:"asistente de IA",
+  s5:"sin token", s6:"sin instalación", s7:"HTTP /mcp", s8:"systemd · un proceso",
+  s9:"NETBOX_TOKEN (solo lectura)", s10:"el token vive acá.", s11:"exactamente acá.",
+  s12:"solo GET", s13:"IPAM / DCIM", s14:"fuente de verdad"
+};
+
+let LANG = "en", CUR = 0;
+let SCENES = SCENES_EN;
+
+const EN_SNAP = {};
+document.querySelectorAll('[data-i18n]').forEach(el => EN_SNAP[el.dataset.i18n] = el.innerHTML);
+
+function setLang(l){
+  LANG = l;
+  SCENES = l === "es" ? SCENES_ES : SCENES_EN;
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const d = l === "es" ? ES[el.dataset.i18n] : EN_SNAP[el.dataset.i18n];
+    if (d != null) el.innerHTML = d;
+  });
+  document.documentElement.lang = l;
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('on', b.dataset.l === l));
+  try { localStorage.setItem('lang', l); } catch(e){}
+  buildChips();
+  play(CUR);
+}
+document.querySelectorAll('.lang-btn').forEach(b =>
+  b.addEventListener('click', () => setLang(b.dataset.l)));
 
 const body = document.getElementById('body');
 const chips = document.getElementById('chips');
@@ -393,6 +532,7 @@ function type(el, text, speed, done){
 
 function play(n){
   clearTimers();
+  CUR = n;
   const s = SCENES[n];
   [...chips.children].forEach((c,i)=>c.setAttribute('aria-selected', i===n));
   body.innerHTML = '';
@@ -423,13 +563,19 @@ function play(n){
   });
 }
 
-SCENES.forEach((s,i)=>{
-  const c = document.createElement('button');
-  c.className = 'chip'; c.textContent = s.fail ? 'when NetBox is down' : s.q;
-  c.onclick = ()=>play(i);
-  chips.appendChild(c);
-});
-play(0);
+function buildChips(){
+  chips.innerHTML = '';
+  SCENES.forEach((s,i)=>{
+    const c = document.createElement('button');
+    c.className = 'chip'; c.textContent = s.chip || s.q;
+    c.onclick = ()=>play(i);
+    chips.appendChild(c);
+  });
+}
+
+let _l = new URLSearchParams(location.search).get("lang");
+if(!_l){ try{ _l = localStorage.getItem("lang"); }catch(e){} }
+setLang(_l === "es" ? "es" : "en");
 </script>
 </body>
 </html>
