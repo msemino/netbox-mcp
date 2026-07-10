@@ -1,0 +1,22 @@
+[Unit]
+Description=netbox-mcp — read-only MCP server over NetBox (HTTP)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=netbox-mcp
+WorkingDirectory=/opt/netbox-mcp
+EnvironmentFile=/opt/netbox-mcp/.env
+ExecStart=/opt/netbox-mcp/venv/bin/python /opt/netbox-mcp/src/server.py
+Restart=always
+RestartSec=5
+
+# The token is the only secret; keep the blast radius small.
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+
+[Install]
+WantedBy=multi-user.target

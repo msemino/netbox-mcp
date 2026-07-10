@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>netbox-mcp — one MCP server, a whole team's IPAM</title>
+<meta name="description" content="A read-only MCP server over NetBox, served over HTTP so an engineering team queries live IPAM from their AI assistants. The token never leaves the server.">
+<style>
+  :root{
+    --bg:#0b1114; --bg2:#0f181c; --card:#111d21; --line:#1f3239;
+    --ink:#dbe9e6; --dim:#8ba7a2; --faint:#5f7a76;
+    --acc:#4fd1c0; --acc2:#0e7c74; --warn:#e0a458; --bad:#d9736b;
+    --mono:"JetBrains Mono","SF Mono",ui-monospace,Menlo,Consolas,monospace;
+    --sans:"Inter",-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.62;
+       font-size:16.5px;-webkit-font-smoothing:antialiased}
+  a{color:var(--acc);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .wrap{max-width:880px;margin:0 auto;padding:0 24px}
+  code{font-family:var(--mono);font-size:.88em;background:#0a1417;border:1px solid var(--line);
+       border-radius:4px;padding:1px 5px;color:#a9ded4}
+
+  /* nav */
+  nav{position:sticky;top:0;z-index:50;background:rgba(11,17,20,.86);
+      backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  nav .wrap{display:flex;align-items:center;justify-content:space-between;height:56px}
+  nav .brand{font-family:var(--mono);font-size:.9rem;color:var(--ink);letter-spacing:-.2px}
+  nav .brand b{color:var(--acc);font-weight:600}
+  nav .links{display:flex;gap:20px;font-size:.85rem}
+  nav .links a{color:var(--dim)}
+  nav .links a:hover{color:var(--acc);text-decoration:none}
+  @media(max-width:640px){nav .links a:not(.gh){display:none}}
+
+  /* hero */
+  header{padding:88px 0 64px;border-bottom:1px solid var(--line);
+         background:radial-gradient(1100px 380px at 50% -8%,rgba(79,209,192,.10),transparent 70%)}
+  .eyebrow{font-family:var(--mono);font-size:.76rem;letter-spacing:1.6px;text-transform:uppercase;
+           color:var(--acc);margin-bottom:16px}
+  h1{font-size:clamp(2rem,5.2vw,3.1rem);line-height:1.1;letter-spacing:-1.4px;font-weight:700;
+     margin-bottom:20px}
+  h1 .g{background:linear-gradient(96deg,var(--acc),#7ee8d8);-webkit-background-clip:text;
+        background-clip:text;-webkit-text-fill-color:transparent}
+  .lede{font-size:1.16rem;color:var(--dim);max-width:60ch;margin-bottom:14px}
+  .prod{display:inline-flex;align-items:center;gap:9px;font-size:.82rem;color:var(--faint);
+        font-family:var(--mono);border:1px solid var(--line);border-radius:999px;
+        padding:6px 14px;margin-top:14px}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--acc);
+       box-shadow:0 0 0 0 rgba(79,209,192,.6);animation:pulse 2.4s infinite}
+  @keyframes pulse{70%{box-shadow:0 0 0 9px rgba(79,209,192,0)}100%{box-shadow:0 0 0 0 rgba(79,209,192,0)}}
+  .cta{display:flex;gap:12px;margin-top:30px;flex-wrap:wrap}
+  .btn{display:inline-block;padding:11px 20px;border-radius:6px;font-size:.9rem;font-weight:600}
+  .btn.p{background:var(--acc);color:#06231f}
+  .btn.p:hover{background:#6fe0d0;text-decoration:none}
+  .btn.s{border:1px solid var(--line);color:var(--ink)}
+  .btn.s:hover{border-color:var(--acc);text-decoration:none}
+
+  /* sections */
+  section{padding:64px 0;border-bottom:1px solid var(--line)}
+  h2{font-size:1.6rem;letter-spacing:-.6px;margin-bottom:8px;font-weight:700}
+  .sub{color:var(--faint);font-size:.92rem;margin-bottom:30px}
+  h3{font-size:1.02rem;margin:26px 0 8px;color:var(--ink);font-weight:600}
+  p{color:var(--dim);margin-bottom:14px}
+  p strong,li strong{color:var(--ink);font-weight:600}
+  ul{margin:0 0 14px 20px;color:var(--dim)}
+  li{margin-bottom:7px}
+
+  /* problem split */
+  .split{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:22px 0}
+  @media(max-width:720px){.split{grid-template-columns:1fr}}
+  .pane{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:20px}
+  .pane .tag{font-family:var(--mono);font-size:.72rem;letter-spacing:1.2px;text-transform:uppercase;
+             margin-bottom:10px}
+  .pane.bad{border-color:rgba(217,115,107,.34)}
+  .pane.bad .tag{color:var(--bad)}
+  .pane.good{border-color:rgba(79,209,192,.34)}
+  .pane.good .tag{color:var(--acc)}
+  .pane p{margin:0;font-size:.93rem}
+  .pane .snip{font-family:var(--mono);font-size:.82rem;color:var(--faint);margin-top:12px;
+              padding-top:12px;border-top:1px solid var(--line);line-height:1.7}
+
+  /* demo */
+  .demo{background:var(--bg2);border:1px solid var(--line);border-radius:10px;overflow:hidden;
+        margin:26px 0}
+  .demo .bar{display:flex;align-items:center;gap:8px;padding:11px 16px;border-bottom:1px solid var(--line);
+             background:#0c1619}
+  .demo .bar .c{width:10px;height:10px;border-radius:50%;background:#22343a}
+  .demo .bar .t{margin-left:8px;font-family:var(--mono);font-size:.76rem;color:var(--faint)}
+  .demo .body{padding:20px 18px;font-size:.92rem;min-height:238px}
+  .turn{margin-bottom:16px}
+  .who{font-family:var(--mono);font-size:.71rem;letter-spacing:1.1px;text-transform:uppercase;
+       color:var(--faint);margin-bottom:5px}
+  .msg{color:var(--ink)}
+  .call{font-family:var(--mono);font-size:.83rem;background:#0a1417;border:1px solid var(--line);
+        border-left:2px solid var(--acc);border-radius:0 5px 5px 0;padding:9px 12px;color:#a9ded4;
+        margin:6px 0}
+  .out{font-family:var(--mono);font-size:.82rem;color:var(--dim);white-space:pre-wrap;
+       padding-left:12px;border-left:1px solid var(--line)}
+  .caret{display:inline-block;width:7px;height:15px;background:var(--acc);vertical-align:-2px;
+         animation:blink 1.05s steps(2,start) infinite}
+  @keyframes blink{to{visibility:hidden}}
+  .demo .foot{display:flex;gap:8px;padding:12px 16px;border-top:1px solid var(--line);background:#0c1619;
+              flex-wrap:wrap}
+  .chip{font-family:var(--mono);font-size:.76rem;color:var(--dim);background:#0a1417;
+        border:1px solid var(--line);border-radius:5px;padding:5px 10px;cursor:pointer;
+        transition:all .15s}
+  .chip:hover{border-color:var(--acc);color:var(--acc)}
+  .chip[aria-selected=true]{border-color:var(--acc);color:var(--acc);background:rgba(79,209,192,.07)}
+
+  /* arch */
+  .arch{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:24px 18px;margin:22px 0}
+  .arch svg{width:100%;height:auto;display:block}
+  .flow{stroke-dasharray:4 5;animation:dash 1.1s linear infinite}
+  @keyframes dash{to{stroke-dashoffset:-18}}
+
+  /* table */
+  .tbl{width:100%;border-collapse:collapse;margin:18px 0;font-size:.92rem}
+  .tbl th{text-align:left;font-family:var(--mono);font-size:.74rem;letter-spacing:1px;
+          text-transform:uppercase;color:var(--faint);padding:9px 12px;border-bottom:1px solid var(--line)}
+  .tbl td{padding:11px 12px;border-bottom:1px solid var(--line);color:var(--dim);vertical-align:top}
+  .tbl td:first-child{font-family:var(--mono);font-size:.85rem;color:var(--acc);white-space:nowrap}
+
+  /* callout */
+  .callout{border-left:2px solid var(--acc);background:rgba(79,209,192,.05);padding:16px 18px;
+           border-radius:0 6px 6px 0;margin:22px 0}
+  .callout p:last-child{margin-bottom:0}
+  .callout.warn{border-color:var(--warn);background:rgba(224,164,88,.05)}
+
+  pre{background:#0a1417;border:1px solid var(--line);border-radius:7px;padding:15px 17px;
+      overflow-x:auto;margin:14px 0}
+  pre code{background:none;border:0;padding:0;font-size:.85rem;color:#a9ded4;line-height:1.65}
+
+  footer{padding:40px 0 56px;color:var(--faint);font-size:.86rem}
+  footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  footer a{color:var(--dim)}
+</style>
+</head>
+<body>
+
+<nav><div class="wrap">
+  <div class="brand"><b>netbox</b>-mcp</div>
+  <div class="links">
+    <a href="#problem">Problem</a>
+    <a href="#demo">Demo</a>
+    <a href="#design">Design</a>
+    <a href="#tools">Tools</a>
+    <a href="#install">Install</a>
+    <a class="gh" href="https://github.com/msemino/netbox-mcp">GitHub →</a>
+  </div>
+</div></nav>
+
+<header><div class="wrap">
+  <div class="eyebrow">Model Context Protocol · read-only · HTTP</div>
+  <h1>One MCP server.<br>A whole team's <span class="g">live IPAM</span>.</h1>
+  <p class="lede">Engineers ask their AI assistant which IPs are free in a subnet, and it answers from NetBox — right now, not from a stale copy in a wiki. Nobody installs anything. The API token never leaves the server.</p>
+  <div class="prod"><span class="dot"></span> In production on the infrastructure team of a national telecom operator</div>
+  <div class="cta">
+    <a class="btn p" href="https://github.com/msemino/netbox-mcp">View source</a>
+    <a class="btn s" href="#demo">See it answer</a>
+  </div>
+</div></header>
+
+<section id="problem"><div class="wrap">
+  <h2>The gap between what you know and what is true</h2>
+  <p class="sub">Infrastructure teams keep two kinds of knowledge, and they rot in different ways.</p>
+
+  <p><strong>Structured data</strong> — subnets, addresses, VLANs — lives in NetBox. Accurate, queryable, and reachable only through a web UI or a REST API. Mid-incident, an engineer opens a browser tab and squints.</p>
+  <p><strong>Narrative knowledge</strong> — runbooks, incident write-ups, the reason a VLAN exists — lives in a wiki. Engineers now read this through AI assistants, which is fast and pleasant.</p>
+  <p>So the assistant can reason about <em>why</em> the network looks like it does, but cannot see <em>what it currently is</em>.</p>
+
+  <div class="split">
+    <div class="pane bad">
+      <div class="tag">The tempting fix</div>
+      <p>Copy the IP addresses into the documentation, so the assistant can read them.</p>
+      <div class="snip">docs/network.md<br>
+        <span style="color:var(--bad)">10.20.30.7 — mail relay</span><br>
+        <span style="color:var(--faint)">// reassigned in March.</span><br>
+        <span style="color:var(--faint)">// nobody noticed.</span></div>
+    </div>
+    <div class="pane good">
+      <div class="tag">What this does instead</div>
+      <p>Give the assistant a way to ask the source of truth directly, at the moment the question is asked.</p>
+      <div class="snip">docs/network.md<br>
+        <span style="color:var(--acc)">see NetBox → VLAN 41</span><br>
+        <span style="color:var(--faint)">// always current.</span><br>
+        <span style="color:var(--faint)">// or it says it can't reach it.</span></div>
+    </div>
+  </div>
+
+  <div class="callout">
+    <p><strong>A copied live value goes stale silently.</strong> That is the whole argument. Six months later the assistant confidently quotes an address that was reassigned in March, and it has no way to know it is wrong. A tool call either returns today's answer or fails loudly.</p>
+  </div>
+</div></section>
+
+<section id="demo"><div class="wrap">
+  <h2>What it looks like in use</h2>
+  <p class="sub">Real tools, real shapes. Pick a question.</p>
+
+  <div class="demo">
+    <div class="bar"><span class="c"></span><span class="c"></span><span class="c"></span>
+      <span class="t">assistant → netbox-mcp → NetBox</span></div>
+    <div class="body" id="body"></div>
+    <div class="foot" id="chips"></div>
+  </div>
+  <p style="font-size:.88rem;color:var(--faint)">Addresses shown are from an illustrative lab range, not any production network.</p>
+</div></section>
+
+<section id="design"><div class="wrap">
+  <h2>Why HTTP, and why one server</h2>
+  <p class="sub">The default way to ship MCP is stdio. For a team, that is a security posture, not a convenience choice.</p>
+
+  <p>With stdio, the assistant spawns the process locally. Every engineer installs Python, clones a repo, and pastes an API token into a config file on their laptop. Now the token exists on <em>N</em> laptops. Rotating it means chasing <em>N</em> people. Revoking access for someone who left means hoping they deleted a dotfile.</p>
+
+  <div class="arch">
+    <svg viewBox="0 0 760 250" xmlns="http://www.w3.org/2000/svg" font-family="var(--mono)">
+      <defs>
+        <marker id="a" markerWidth="9" markerHeight="9" refX="7" refY="3.2" orient="auto">
+          <path d="M0,0 L0,6.4 L7,3.2 z" fill="#4fd1c0"/>
+        </marker>
+      </defs>
+      <!-- clients -->
+      <text x="76" y="26" fill="#5f7a76" font-size="11" text-anchor="middle">ENGINEERS</text>
+      <g fill="#111d21" stroke="#1f3239">
+        <rect x="16" y="42" width="120" height="34" rx="5"/>
+        <rect x="16" y="90" width="120" height="34" rx="5"/>
+        <rect x="16" y="138" width="120" height="34" rx="5"/>
+      </g>
+      <g fill="#8ba7a2" font-size="11.5" text-anchor="middle">
+        <text x="76" y="63">AI assistant</text>
+        <text x="76" y="111">AI assistant</text>
+        <text x="76" y="159">AI assistant</text>
+      </g>
+      <text x="76" y="196" fill="#5f7a76" font-size="10.5" text-anchor="middle">no token</text>
+      <text x="76" y="211" fill="#5f7a76" font-size="10.5" text-anchor="middle">no install</text>
+
+      <!-- arrows in -->
+      <g stroke="#4fd1c0" stroke-width="1.4" fill="none" marker-end="url(#a)" opacity=".85">
+        <path class="flow" d="M140,59 C200,59 210,100 268,105"/>
+        <path class="flow" d="M140,107 L268,107"/>
+        <path class="flow" d="M140,155 C200,155 210,114 268,109"/>
+      </g>
+      <text x="204" y="88" fill="#5f7a76" font-size="10" text-anchor="middle">HTTP /mcp</text>
+
+      <!-- server -->
+      <rect x="272" y="60" width="196" height="96" rx="7" fill="#111d21" stroke="#4fd1c0" stroke-opacity=".5"/>
+      <text x="370" y="86" fill="#dbe9e6" font-size="13" text-anchor="middle" font-weight="600">netbox-mcp</text>
+      <text x="370" y="106" fill="#5f7a76" font-size="10.5" text-anchor="middle">systemd · one process</text>
+      <rect x="296" y="118" width="148" height="24" rx="4" fill="#0a1417" stroke="#2f665d"/>
+      <text x="370" y="134" fill="#4fd1c0" font-size="10.5" text-anchor="middle">NETBOX_TOKEN (read-only)</text>
+      <text x="370" y="176" fill="#5f7a76" font-size="10.5" text-anchor="middle">the token lives here.</text>
+      <text x="370" y="191" fill="#5f7a76" font-size="10.5" text-anchor="middle">exactly here.</text>
+
+      <!-- arrow out -->
+      <path class="flow" d="M472,108 L588,108" stroke="#4fd1c0" stroke-width="1.4" fill="none" marker-end="url(#a)" opacity=".85"/>
+      <text x="530" y="98" fill="#5f7a76" font-size="10" text-anchor="middle">GET only</text>
+
+      <!-- netbox -->
+      <rect x="592" y="66" width="152" height="84" rx="7" fill="#111d21" stroke="#1f3239"/>
+      <text x="668" y="98" fill="#dbe9e6" font-size="13" text-anchor="middle" font-weight="600">NetBox</text>
+      <text x="668" y="118" fill="#5f7a76" font-size="10.5" text-anchor="middle">IPAM / DCIM</text>
+      <text x="668" y="134" fill="#5f7a76" font-size="10.5" text-anchor="middle">source of truth</text>
+    </svg>
+  </div>
+
+  <p>Serving MCP over HTTP inverts every one of those properties:</p>
+  <ul>
+    <li><strong>The token lives in exactly one place</strong> — an <code>EnvironmentFile</code> readable only by the service user. It never reaches a client.</li>
+    <li><strong>Onboarding is a URL.</strong> A new engineer adds one line to their assistant config.</li>
+    <li><strong>Offboarding is a firewall rule</strong>, not a trust exercise.</li>
+    <li><strong>Tools are versioned centrally.</strong> Fix a query once, everyone gets the fix.</li>
+  </ul>
+
+  <div class="callout warn">
+    <p><strong>The trade-off, stated plainly.</strong> The endpoint is now a network service and must be treated as one. It listens on an internal network or a private mesh — never the public internet — and it carries no authentication of its own. Network reachability <em>is</em> the access control. If that assumption does not hold for you, put it behind a reverse proxy with auth.</p>
+  </div>
+
+  <h3>Read-only by construction, not by convention</h3>
+  <p>The single HTTP helper in this server issues <code>GET</code> and nothing else. There is no code path that writes to NetBox, so an assistant cannot be talked into deleting a prefix, however the prompt is phrased.</p>
+  <p>Pair that with a <strong>read-only NetBox token</strong> and the property survives a bug. Two independent mechanisms, because one of them will eventually be a mistake.</p>
+
+  <h3>Failure is a sentence, not a stack trace</h3>
+  <p>An unguarded MCP tool hands the assistant a Python traceback, and the assistant hands the operator a shrug. Every tool here is wrapped so transport failures come back as something a human can act on:</p>
+  <pre><code>NetBox rejected the token (401/403). Check NETBOX_TOKEN.
+NetBox is unreachable at http://netbox.internal:8090 (Connection refused).
+NetBox did not answer within 20s.</code></pre>
+  <p>This matters more than it sounds. An incident is exactly when your tooling is most likely to be degraded, and exactly when a confusing error costs the most.</p>
+</div></section>
+
+<section id="tools"><div class="wrap">
+  <h2>Five tools</h2>
+  <p class="sub">The docstring is the interface — the assistant reads it to choose. Each is written for someone who has never seen NetBox, with a concrete example.</p>
+  <table class="tbl">
+    <thead><tr><th>Tool</th><th>What it answers</th></tr></thead>
+    <tbody>
+      <tr><td>list_prefixes</td><td>Every documented subnet, with its VLAN and description.</td></tr>
+      <tr><td>prefix_report</td><td>For one subnet: how many IPs are documented, and the first free ones.</td></tr>
+      <tr><td>find_ip</td><td>Search by DNS name, description or address fragment.</td></tr>
+      <tr><td>subnet_contents</td><td>Every documented IP inside a subnet, in address order.</td></tr>
+      <tr><td>list_vlans</td><td>Known VLANs, ordered by VLAN ID.</td></tr>
+    </tbody>
+  </table>
+  <h3>Adding one is a decorated function</h3>
+  <p>Three rules keep the assistant using it correctly: <strong>GET only</strong> (the read-only guarantee is the whole security model); <strong>the docstring is the API</strong> (write it for someone who does not know your schema); and <strong>return text a human could read</strong>, not JSON — the assistant will paraphrase it anyway, and readable output makes a hallucinated field obvious.</p>
+</div></section>
+
+<section id="install"><div class="wrap">
+  <h2>Install</h2>
+  <p class="sub">Python 3.10+, a reachable NetBox, and a read-only API token.</p>
+  <pre><code>git clone https://github.com/msemino/netbox-mcp
+cd netbox-mcp
+python3 -m venv venv && ./venv/bin/pip install -r requirements.txt
+
+cp .env.example .env    # set NETBOX_URL and a read-only NETBOX_TOKEN
+chmod 600 .env
+set -a && . ./.env && set +a && ./venv/bin/python src/server.py</code></pre>
+  <p>Then point an assistant at it:</p>
+  <pre><code>claude mcp add --transport http netbox http://netbox-mcp.internal:8097/mcp</code></pre>
+  <p>A systemd unit with a hardened sandbox ships in <code>deploy/</code>.</p>
+</div></section>
+
+<footer><div class="wrap">
+  <div>Built by <a href="https://github.com/msemino">Marcelo Semino</a> · MIT licensed</div>
+  <div><a href="https://proyectos-msemino.vercel.app">← all projects</a> · <a href="https://github.com/msemino/netbox-mcp">source</a></div>
+</div></footer>
+
+<script>
+const SCENES = [
+  {
+    q: "Which IPs are free in the server subnet?",
+    tool: 'prefix_report(prefix="10.20.30.0/24")',
+    out: `10.20.30.0/24 (Server segment)
+Documented IPs: 74
+First free IPs: 10.20.30.41, 10.20.30.42, 10.20.30.57`,
+    a: "The server segment has 74 documented addresses. The next free ones are .41, .42 and .57 — .41 is the lowest, so take that unless you're keeping a contiguous block."
+  },
+  {
+    q: "What is 10.20.30.7?",
+    tool: 'find_ip(query="10.20.30.7")',
+    out: `10.20.30.7 | monitor.lab.internal | Monitoring server — networking`,
+    a: "That's monitor.lab.internal, the monitoring server for the networking side. It's documented, so it isn't a stray host."
+  },
+  {
+    q: "List every subnet that mentions wireless.",
+    tool: 'list_prefixes()',
+    out: `10.20.41.0/24 VLAN41 - Wireless — corporate
+10.20.42.0/24 VLAN42 - Wireless — guest
+10.20.43.0/24 VLAN43 - Wireless — APs management`,
+    a: "Three: corporate on VLAN 41, guest on 42, and the AP management network on 43. The APs themselves live on 43, not on the SSIDs they serve."
+  },
+  {
+    q: "(NetBox is down)",
+    tool: 'list_vlans()',
+    out: `NetBox is unreachable at http://netbox.internal:8090
+(Connection refused).`,
+    a: "I can't reach NetBox right now — the connection is refused, so the service is likely down rather than slow. I won't guess at VLAN numbers. Check the NetBox container before you rely on any address I gave you earlier in this session.",
+    fail: true
+  }
+];
+
+const body = document.getElementById('body');
+const chips = document.getElementById('chips');
+let timers = [];
+
+function clearTimers(){ timers.forEach(clearTimeout); timers = []; }
+
+function type(el, text, speed, done){
+  let i = 0;
+  el.innerHTML = '<span class="caret"></span>';
+  (function step(){
+    if (i >= text.length){ el.textContent = text; done && done(); return; }
+    i += 2;
+    el.innerHTML = text.slice(0, i).replace(/</g,'&lt;') + '<span class="caret"></span>';
+    timers.push(setTimeout(step, speed));
+  })();
+}
+
+function play(n){
+  clearTimers();
+  const s = SCENES[n];
+  [...chips.children].forEach((c,i)=>c.setAttribute('aria-selected', i===n));
+  body.innerHTML = '';
+
+  const t1 = document.createElement('div'); t1.className = 'turn';
+  t1.innerHTML = '<div class="who">Engineer</div><div class="msg"></div>';
+  body.appendChild(t1);
+
+  type(t1.querySelector('.msg'), s.q, 16, () => {
+    timers.push(setTimeout(()=>{
+      const t2 = document.createElement('div'); t2.className = 'turn';
+      t2.innerHTML = '<div class="who">Assistant → tool call</div>'
+        + '<div class="call">' + s.tool.replace(/</g,'&lt;') + '</div>'
+        + '<div class="out"></div>';
+      body.appendChild(t2);
+      const out = t2.querySelector('.out');
+      if (s.fail) out.style.color = 'var(--bad)';
+
+      type(out, s.out, 6, () => {
+        timers.push(setTimeout(()=>{
+          const t3 = document.createElement('div'); t3.className = 'turn';
+          t3.innerHTML = '<div class="who">Assistant</div><div class="msg"></div>';
+          body.appendChild(t3);
+          type(t3.querySelector('.msg'), s.a, 10);
+        }, 380));
+      });
+    }, 420));
+  });
+}
+
+SCENES.forEach((s,i)=>{
+  const c = document.createElement('button');
+  c.className = 'chip'; c.textContent = s.fail ? 'when NetBox is down' : s.q;
+  c.onclick = ()=>play(i);
+  chips.appendChild(c);
+});
+play(0);
+</script>
+</body>
+</html>
