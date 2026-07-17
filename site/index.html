@@ -158,6 +158,31 @@
   @media print{.lang-switch{display:none}}
   /* keep the sticky nav clear of the switch on narrow viewports */
   @media(max-width:980px){nav .wrap{padding-right:104px}}
+  .stage{border:2px solid var(--line);background:var(--card);padding:22px 18px 26px;margin-top:26px}
+  .scen-btns{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:12px}
+  .scen{font-family:var(--mono);font-size:12.5px;padding:8px 13px;border:2px solid var(--line);
+    background:var(--bg);color:var(--ink);cursor:pointer;border-radius:0;transition:.15s}
+  .scen:hover{transform:translate(-1px,-1px);box-shadow:2px 2px 0 var(--acc)}
+  .scen.active{background:var(--line);color:var(--bg)}
+  .scen-hint{font-family:var(--mono);font-size:12.5px;color:var(--dim);margin:0 0 14px;min-height:3.9em;line-height:1.5}
+  .scen-hint b{color:var(--ink)}
+  .scen-hint code{background:var(--bg2);padding:0 4px;border:1px solid var(--line)}
+  .node rect{fill:var(--card);stroke:var(--line);stroke-width:2;transition:.35s}
+  .node .lbl-t{fill:var(--ink);font-family:var(--mono);font-size:12px;font-weight:600}
+  .node .lbl-s{fill:var(--faint);font-family:var(--mono);font-size:9.5px}
+  .node.out rect{fill:var(--bg2)}
+  .node.hot rect{stroke:var(--acc);stroke-width:3}
+  .node.hot-red rect{stroke:var(--bad);stroke-width:3}
+  .node.hot-red .lbl-t{fill:var(--bad)}
+  .node.cold{opacity:.28}
+  .node.empty rect{stroke-dasharray:5 3;stroke:var(--faint)}
+  .node.empty .lbl-t{fill:var(--faint)}
+  .node.empty{opacity:.75}
+  .rp{stroke:var(--line);stroke-width:2;fill:none;transition:.3s}
+  .rp.dim{opacity:.13}
+  .rp.on{stroke:var(--acc);stroke-width:3.2}
+  .rp.on-red{stroke:var(--bad);stroke-width:3.2}
+  #nb-pip{filter:drop-shadow(0 0 4px currentColor)}
 </style>
 
 <meta property="og:title" content="netbox-mcp — one MCP server, a whole team&#x27;s IPAM">
@@ -185,7 +210,7 @@
     <a href="#problem" data-i18n="n1">Problem</a>
     <a href="#demo" data-i18n="n2">Demo</a>
     <a href="#design" data-i18n="n3">Design</a>
-    <a href="#tools" data-i18n="n4">Tools</a>
+    <a href="#flow" data-i18n="n7">Request path</a><a href="#tools" data-i18n="n4">Tools</a>
     <a href="#install" data-i18n="n5">Install</a>
     <a href="https://proyectos-msemino.vercel.app" data-i18n="n6">◂ All projects</a>
     <a class="gh" href="https://github.com/msemino/netbox-mcp">GitHub →</a>
@@ -330,6 +355,77 @@ NetBox did not answer within 20s.</code></pre>
   <p data-i18n="k37">This matters more than it sounds. An incident is exactly when your tooling is most likely to be degraded, and exactly when a confusing error costs the most.</p>
 </div></section>
 
+<section id="flow"><div class="wrap">
+  <h2 data-i18n="k56">Five tools, and four ways to fail in a full sentence.</h2>
+  <p class="sub" data-i18n="k57">An incident is exactly when your tooling is most likely to be degraded — so every failure here comes back as something an operator can act on, not a traceback. Pick a scenario and watch the path run.</p>
+
+  <div class="stage">
+    <div class="scen-btns">
+      <button class="scen active" data-s="ok" data-i18n="k58">● a normal query</button>
+      <button class="scen" data-s="token" data-i18n="k59">▲ token rejected</button>
+      <button class="scen" data-s="down" data-i18n="k60">✷ NetBox down</button>
+      <button class="scen" data-s="slow" data-i18n="k61">◆ NetBox too slow</button>
+      <button class="scen" data-s="write" data-i18n="k62">✕ "delete that prefix"</button>
+    </div>
+    <div class="scen-hint" id="nb-hint"></div>
+
+    <svg viewBox="0 0 1000 420" width="100%" role="img" aria-label="netbox-mcp request path">
+      <path id="r-asst-tool" class="rp" d="M156,72 H200"/>
+      <path id="r-tool-api"  class="rp" d="M370,72 H414"/>
+      <path id="r-api-nbx"   class="rp" d="M584,72 H628"/>
+      <path id="r-nbx-guard" class="rp" d="M703,100 C703,150 620,204 584,204"/>
+      <path id="r-api-guard" class="rp" d="M499,100 V176"/>
+      <path id="r-g-ok"      class="rp" d="M584,190 C608,190 616,162 640,162"/>
+      <path id="r-g-token"   class="rp" d="M584,200 C608,200 616,218 640,218"/>
+      <path id="r-g-http"    class="rp" d="M584,208 C610,208 614,274 640,274"/>
+      <path id="r-g-down"    class="rp" d="M584,214 C612,214 616,330 640,330"/>
+      <path id="r-g-slow"    class="rp" d="M584,220 C612,220 616,386 640,386"/>
+
+      <circle id="nb-pip" r="5.5" cx="-20" cy="-20" style="opacity:0"/>
+
+      <g class="node" id="n-asst"><rect x="16" y="44" width="140" height="56" rx="0"/>
+        <text class="lbl-t" x="86" y="68" text-anchor="middle" data-i18n="s15">AI assistant</text>
+        <text class="lbl-s" x="86" y="84" text-anchor="middle" data-i18n="s16">plain language</text></g>
+
+      <g class="node" id="n-tool"><rect x="200" y="44" width="170" height="56" rx="0"/>
+        <text class="lbl-t" x="285" y="68" text-anchor="middle" data-i18n="s17">MCP tool</text>
+        <text class="lbl-s" x="285" y="84" text-anchor="middle" data-i18n="s18">5 tools · all read</text></g>
+
+      <g class="node" id="n-api"><rect x="414" y="44" width="170" height="56" rx="0"/>
+        <text class="lbl-t" x="499" y="68" text-anchor="middle" data-i18n="s19">_api()</text>
+        <text class="lbl-s" x="499" y="84" text-anchor="middle" data-i18n="s20">method=&quot;GET&quot;, hardcoded</text></g>
+
+      <g class="node" id="n-nbx"><rect x="628" y="44" width="150" height="56" rx="0"/>
+        <text class="lbl-t" x="703" y="68" text-anchor="middle" data-i18n="s21">NetBox</text>
+        <text class="lbl-s" x="703" y="84" text-anchor="middle" data-i18n="s22">source of truth</text></g>
+
+      <g class="node" id="n-guard"><rect x="414" y="176" width="170" height="56" rx="0"/>
+        <text class="lbl-t" x="499" y="200" text-anchor="middle" data-i18n="s23">_guard</text>
+        <text class="lbl-s" x="499" y="216" text-anchor="middle" data-i18n="s24">error → sentence</text></g>
+
+      <g class="node out" id="n-ok"><rect x="640" y="140" width="344" height="44" rx="0"/>
+        <text class="lbl-t" x="812" y="160" text-anchor="middle" data-i18n="s25">VLAN10 MGMT</text>
+        <text class="lbl-s" x="812" y="175" text-anchor="middle" data-i18n="s26">200 · rows of text, not JSON</text></g>
+
+      <g class="node out" id="n-token"><rect x="640" y="196" width="344" height="44" rx="0"/>
+        <text class="lbl-t" x="812" y="216" text-anchor="middle" data-i18n="s27">Check NETBOX_TOKEN.</text>
+        <text class="lbl-s" x="812" y="231" text-anchor="middle" data-i18n="s28">HTTPError 401 / 403</text></g>
+
+      <g class="node out" id="n-http"><rect x="640" y="252" width="344" height="44" rx="0"/>
+        <text class="lbl-t" x="812" y="272" text-anchor="middle" data-i18n="s29">NetBox returned HTTP 500</text>
+        <text class="lbl-s" x="812" y="287" text-anchor="middle" data-i18n="s30">HTTPError · any other code</text></g>
+
+      <g class="node out" id="n-down"><rect x="640" y="308" width="344" height="44" rx="0"/>
+        <text class="lbl-t" x="812" y="328" text-anchor="middle" data-i18n="s31">NetBox is unreachable</text>
+        <text class="lbl-s" x="812" y="343" text-anchor="middle" data-i18n="s32">URLError · connection refused</text></g>
+
+      <g class="node out" id="n-slow"><rect x="640" y="364" width="344" height="44" rx="0"/>
+        <text class="lbl-t" x="812" y="384" text-anchor="middle" data-i18n="s33">No answer within 20s</text>
+        <text class="lbl-s" x="812" y="399" text-anchor="middle" data-i18n="s34">TimeoutError</text></g>
+    </svg>
+  </div>
+</div></section>
+
 <section id="tools"><div class="wrap">
   <h2 data-i18n="k38">Five tools</h2>
   <p class="sub" data-i18n="k39">The docstring is the interface — the assistant reads it to choose. Each is written for someone who has never seen NetBox, with a concrete example.</p>
@@ -434,6 +530,7 @@ const SCENES_ES = [
 
 const ES = {
   n1:"Problema", n2:"Demo", n3:"Diseño", n4:"Herramientas", n5:"Instalación",
+  n7:"Camino de la request",
   n6:"◂ Todos los proyectos",
 
   k1:"Model Context Protocol · solo lectura · HTTP",
@@ -492,6 +589,33 @@ const ES = {
   k51:"Después apuntá un asistente hacia él:",
   k52:"En <code>deploy/</code> viene una unidad de systemd con un sandbox endurecido.",
   k53:"Hecho por <a href=\"https://github.com/msemino\">Marcelo Semino</a> · licencia MIT",
+  k56: "Cinco tools, y cuatro formas de fallar en una frase entera.",
+  k57: "Un incidente es justo cuando tus herramientas están más degradadas — así que acá cada falla vuelve como algo sobre lo que un operador puede actuar, no como un traceback. Elegí un escenario y mirá cómo corre.",
+  k58: "● consulta normal",
+  k59: "▲ token rechazado",
+  k60: "✷ NetBox caído",
+  k61: "◆ NetBox lento",
+  k62: "✕ «borrá ese prefijo»",
+  s15: "asistente IA",
+  s16: "lenguaje natural",
+  s17: "tool MCP",
+  s18: "5 tools · todas de lectura",
+  s19: "_api()",
+  s20: "method=\"GET\", hardcodeado",
+  s21: "NetBox",
+  s22: "fuente de verdad",
+  s23: "_guard",
+  s24: "error → frase",
+  s25: "VLAN10 MGMT",
+  s26: "200 · texto plano, no JSON",
+  s27: "Check NETBOX_TOKEN.",
+  s28: "HTTPError 401 / 403",
+  s29: "NetBox returned HTTP 500",
+  s30: "HTTPError · cualquier otro código",
+  s31: "NetBox is unreachable",
+  s32: "URLError · conexión rechazada",
+  s33: "No answer within 20s",
+  s34: "TimeoutError",
   k54:"<a href=\"https://proyectos-msemino.vercel.app\">← todos los proyectos</a> · <a href=\"https://github.com/msemino/netbox-mcp\">código</a>",
 
   s1:"INGENIEROS", s2:"asistente de IA", s3:"asistente de IA", s4:"asistente de IA",
@@ -585,6 +709,132 @@ function buildChips(){
 let _l = new URLSearchParams(location.search).get("lang");
 if(!_l){ try{ _l = localStorage.getItem("lang"); }catch(e){} }
 setLang(_l === "es" ? "es" : "en");
+</script>
+
+<script>
+/* Camino de la request. Cada nodo mapea a src/server.py (clone 107d862, rama main):
+   n-tool  -> los 5 @mcp.tool(): list_prefixes, prefix_report, find_ip, subnet_contents, list_vlans
+   n-api   -> _api(): urllib.request.Request(..., method="GET") — no hay otro metodo en el archivo
+   n-guard -> _guard(): HTTPError 401/403 | HTTPError otro | URLError | TimeoutError
+   Los 5 mensajes de salida fueron MEDIDOS llamando a las tools contra un NetBox simulado
+   (200 / 403 / 500 / conexion rechazada / read timeout con NETBOX_TIMEOUT=1). */
+(function(){
+  const $ = (q) => document.querySelector(q);
+  const $$ = (q) => Array.from(document.querySelectorAll(q));
+  const pip = $("#nb-pip"); let anim = null; let cur = "ok";
+  const OUTS = ["n-ok","n-token","n-http","n-down","n-slow"];
+  const EDGES = ["r-g-ok","r-g-token","r-g-http","r-g-down","r-g-slow"];
+  const req = ["r-asst-tool","r-tool-api","r-api-nbx","r-nbx-guard"];
+  const other = (keep) => EDGES.filter(e => e !== keep);
+
+  const SCEN = {
+    ok: {
+      path: req.concat(["r-g-ok"]),
+      hot: ["n-asst","n-tool","n-api","n-nbx","n-guard","n-ok"],
+      cold: ["n-token","n-http","n-down","n-slow"],
+      dim: other("r-g-ok").concat(["r-api-guard"]),
+      hint: {
+        en: "<b>list_vlans</b> &#8594; <code>GET /api/ipam/vlans/?limit=500&amp;ordering=vid</code> &#8594; rows of text, not JSON. The tools return what a human could read on purpose: the assistant is going to paraphrase it anyway, and readable output makes a hallucinated field obvious.",
+        es: "<b>list_vlans</b> &#8594; <code>GET /api/ipam/vlans/?limit=500&amp;ordering=vid</code> &#8594; filas de texto, no JSON. Las tools devuelven algo que un humano podría leer a propósito: el asistente lo va a parafrasear igual, y una salida legible deja en evidencia un campo alucinado."
+      }
+    },
+    token: {
+      path: req.concat(["r-g-token"]), red: true,
+      hot: ["n-asst","n-tool","n-api","n-nbx"], hotred: ["n-guard","n-token"],
+      cold: ["n-ok","n-http","n-down","n-slow"],
+      dim: other("r-g-token").concat(["r-api-guard"]),
+      hint: {
+        en: "NetBox answers <b>401</b> or <b>403</b> &#8594; <code>_guard</code> returns <i>\u201cNetBox rejected the token (401/403). Check NETBOX_TOKEN.\u201d</i> The assistant relays a sentence naming the thing to check, instead of a traceback.",
+        es: "NetBox responde <b>401</b> o <b>403</b> &#8594; <code>_guard</code> devuelve <i>\u201cNetBox rejected the token (401/403). Check NETBOX_TOKEN.\u201d</i> El asistente transmite una frase que nombra qué revisar, en vez de un traceback."
+      }
+    },
+    down: {
+      path: ["r-asst-tool","r-tool-api","r-api-nbx","r-api-guard","r-g-down"], red: true,
+      hot: ["n-asst","n-tool","n-api"], hotred: ["n-guard","n-down"],
+      empty: ["n-nbx"],
+      cold: ["n-ok","n-token","n-http","n-slow"],
+      dim: other("r-g-down").concat(["r-nbx-guard"]),
+      hint: {
+        en: "The connection never lands &#8594; <code>URLError</code> &#8594; <i>\u201cNetBox is unreachable at &lt;url&gt; (Connection refused).\u201d</i> <b>The URL is in the message</b>, so whoever reads it knows which host to go look at.",
+        es: "La conexión nunca llega &#8594; <code>URLError</code> &#8594; <i>\u201cNetBox is unreachable at &lt;url&gt; (Connection refused).\u201d</i> <b>La URL va en el mensaje</b>, así el que lo lee sabe qué host ir a mirar."
+      }
+    },
+    slow: {
+      path: ["r-asst-tool","r-tool-api","r-api-nbx","r-api-guard","r-g-slow"], red: true,
+      hot: ["n-asst","n-tool","n-api"], hotred: ["n-guard","n-slow"],
+      empty: ["n-nbx"],
+      cold: ["n-ok","n-token","n-http","n-down"],
+      dim: other("r-g-slow").concat(["r-nbx-guard"]),
+      hint: {
+        en: "NetBox accepts the connection and then goes quiet &#8594; <code>TimeoutError</code> after <code>NETBOX_TIMEOUT</code> (20s) &#8594; <i>\u201cNetBox did not answer within 20s.\u201d</i> A hung tool call is worse than a failed one: this one always ends.",
+        es: "NetBox acepta la conexión y después se queda mudo &#8594; <code>TimeoutError</code> a los <code>NETBOX_TIMEOUT</code> (20s) &#8594; <i>\u201cNetBox did not answer within 20s.\u201d</i> Una tool colgada es peor que una que falla: esta siempre termina.",
+      }
+    },
+    write: {
+      path: ["r-asst-tool"],
+      hot: ["n-asst"], empty: ["n-tool"],
+      cold: ["n-api","n-nbx","n-guard"].concat(OUTS),
+      dim: ["r-tool-api","r-api-nbx","r-nbx-guard","r-api-guard"].concat(EDGES),
+      hint: {
+        en: "Ask it to delete a prefix and <b>the path stops here</b>: there is no write tool to call, and <code>_api</code> hardcodes <code>method=\"GET\"</code> &#8212; there is no code path to NetBox that writes. Read-only <b>by construction</b>, and again by the read-only token: two mechanisms, because one of them will eventually be a mistake.",
+        es: "Pedile que borre un prefijo y <b>el camino se corta acá</b>: no hay ninguna tool de escritura que llamar, y <code>_api</code> hardcodea <code>method=\"GET\"</code> &#8212; no existe camino de código a NetBox que escriba. Read-only <b>por construcción</b>, y otra vez por el token de solo lectura: dos mecanismos, porque uno de los dos va a ser un error alguna vez."
+      }
+    }
+  };
+
+  function lang(){ return document.documentElement.lang === "es" ? "es" : "en"; }
+  function renderHint(){ const h = $("#nb-hint"); if (h) h.innerHTML = SCEN[cur].hint[lang()]; }
+
+  function reset(){
+    $$(".rp").forEach(e => e.classList.remove("on","on-red","dim"));
+    $$(".node").forEach(n => n.classList.remove("hot","hot-red","cold","empty"));
+    pip.style.opacity = 0;
+    if (anim) cancelAnimationFrame(anim);
+  }
+
+  function play(key){
+    reset();
+    const sc = SCEN[key];
+    (sc.cold  || []).forEach(id => { const n = $("#"+id); if (n) n.classList.add("cold"); });
+    (sc.empty || []).forEach(id => { const n = $("#"+id); if (n) n.classList.add("empty"); });
+    (sc.dim   || []).forEach(id => { const e = $("#"+id); if (e) e.classList.add("dim"); });
+    (sc.hot   || []).forEach(id => { const n = $("#"+id); if (n) n.classList.add("hot"); });
+    (sc.hotred|| []).forEach(id => { const n = $("#"+id); if (n) n.classList.add("hot-red"); });
+    const cls = sc.red ? "on-red" : "on";
+    sc.path.forEach(id => { const e = $("#"+id); if (e) e.classList.add(cls); });
+
+    const segs = sc.path.map(id => $("#"+id)).filter(Boolean);
+    if (!segs.length) return;
+    const lens = segs.map(p => p.getTotalLength());
+    const total = lens.reduce((a,b) => a+b, 0);
+    const cs = getComputedStyle(document.documentElement);
+    const col = (sc.red ? cs.getPropertyValue("--bad") : cs.getPropertyValue("--acc")).trim()
+      || (sc.red ? "#c0392b" : "#b8460e");
+    pip.setAttribute("fill", col); pip.style.color = col; pip.style.opacity = 1;
+
+    const dur = sc.path.length < 2 ? 700 : 1900; let t0 = null;
+    function step(ts){
+      if (t0 === null) t0 = ts;
+      const t = (ts - t0) / dur;
+      if (t > 1){ pip.style.opacity = 0; return; }
+      let d = t*total, i = 0;
+      while (i < lens.length-1 && d > lens[i]){ d -= lens[i]; i++; }
+      const pt = segs[i].getPointAtLength(Math.min(d, lens[i]));
+      pip.setAttribute("cx", pt.x); pip.setAttribute("cy", pt.y);
+      anim = requestAnimationFrame(step);
+    }
+    anim = requestAnimationFrame(step);
+  }
+
+  function activate(key){
+    cur = key;
+    $$(".scen").forEach(b => b.classList.toggle("active", b.dataset.s === key));
+    renderHint(); play(key);
+  }
+  $$(".scen").forEach(b => b.addEventListener("click", () => activate(b.dataset.s)));
+  window.addEventListener("nb-lang", renderHint);
+  activate("ok");
+})();
 </script>
 </body>
 </html>
