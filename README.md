@@ -98,6 +98,46 @@ The assistant can relay that to a human who knows what to do about it. This matt
 than it sounds: an incident is exactly when your tooling is most likely to be degraded,
 and exactly when a confusing error costs the most.
 
+## The request path
+
+Every box below maps to real code; the table after the diagram gives the function for each.
+
+```mermaid
+flowchart LR
+    A(["AI assistant"]) --> T["MCP tool<br/>5 tools, all read"]
+    T --> API["_api()<br/>method=GET, hardcoded"]
+    API -->|"GET /api/..."| NB[("NetBox<br/>source of truth")]
+    NB -->|"response"| G{"_guard"}
+    API -.->|"raised, no response"| G
+    G -->|"200"| OK["rows of text, not JSON"]
+    G -->|"HTTPError 401 / 403"| E1["Check NETBOX_TOKEN."]
+    G -->|"HTTPError, any other"| E2["NetBox returned HTTP nnn"]
+    G -->|"URLError"| E3["NetBox is unreachable at &lt;url&gt;"]
+    G -->|"TimeoutError"| E4["No answer within 20s"]
+    W(["delete that prefix"]) -.->|"no write tool exists"| X(("no path"))
+```
+
+| Box | Where it lives |
+|---|---|
+| MCP tool | `src/server.py` — the five `@mcp.tool()` functions: `list_prefixes`, `prefix_report`, `find_ip`, `subnet_contents`, `list_vlans` |
+| `_api()` | `src/server.py` — `urllib.request.Request(..., method="GET")`. There is no other method in the file, and no write path to NetBox |
+| `_guard` | `src/server.py` — decorator around every tool. Catches `HTTPError` (401/403 separately), `URLError` and `TimeoutError`, and returns a sentence |
+| Timeout | `NETBOX_TIMEOUT`, default **20s**. A read timeout returns *"did not answer within 20s"*; a connection that never lands returns the `URLError` message instead |
+| Transport | `mcp.run(transport="streamable-http")` on `HOST:PORT`, default `0.0.0.0:8097`, served at `/mcp` |
+
+The error strings above are not illustrative — they are what the tools actually return, checked
+by calling each one against a stub NetBox that answers 200, 403, 500, refuses the connection,
+and accepts-then-stalls.
+
+**See it animated:** the [project page](https://netbox-mcp.vercel.app) runs these paths — a normal
+query, each failure, and *"delete that prefix"* — as a live diagram.
+
+> **What `_guard` does not catch, stated plainly.** It converts *transport* failures, not schema
+> surprises. If NetBox answers `200` with a body this code does not expect, the `KeyError` escapes
+> the guard and the MCP layer turns it into `Error executing tool list_vlans: 'vid'` — an error
+> string, not a sentence an operator can act on. That is the honest edge of the "failure is a
+> sentence" claim: it holds for the network, not for the schema.
+
 ---
 
 ## Install
