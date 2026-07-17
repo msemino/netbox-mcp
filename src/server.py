@@ -15,6 +15,7 @@ Configuration is entirely by environment:
 Run:
     NETBOX_URL=... NETBOX_TOKEN=... python src/server.py
 """
+import functools
 import json
 import os
 import urllib.error
@@ -57,6 +58,7 @@ def _guard(fn):
     explains why it failed lets the assistant tell the operator what to check.
     """
 
+    @functools.wraps(fn)
     def wrapper(*args, **kwargs):
         try:
             return fn(*args, **kwargs)
@@ -69,8 +71,6 @@ def _guard(fn):
         except TimeoutError:
             return f"NetBox did not answer within {TIMEOUT}s."
 
-    wrapper.__name__ = fn.__name__
-    wrapper.__doc__ = fn.__doc__
     return wrapper
 
 
