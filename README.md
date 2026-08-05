@@ -127,7 +127,14 @@ flowchart LR
 
 The error strings above are not illustrative — they are what the tools actually return, checked
 by calling each one against a stub NetBox that answers 200, 403, 500, refuses the connection,
-and accepts-then-stalls.
+and accepts-then-stalls. That check is in the repository, so you can run it yourself:
+
+```bash
+./venv/bin/python tests/check_error_strings.py
+```
+
+It starts the stub in each mode, calls all five tools against it, and asserts the returned
+sentence — 25 calls, no NetBox required.
 
 **See it animated:** the [project page](https://netbox-mcp.vercel.app) runs these paths — a normal
 query, each failure, and *"delete that prefix"* — as a live diagram.
