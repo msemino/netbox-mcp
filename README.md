@@ -134,7 +134,16 @@ and accepts-then-stalls. That check is in the repository, so you can run it your
 ```
 
 It starts the stub in each mode, calls all five tools against it, and asserts the returned
-sentence — 25 calls, no NetBox required.
+sentence — 25 calls, no NetBox required. It runs on every push
+([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) on Python 3.10 and 3.12.
+
+> **It used to be able to report green while proving nothing.** The checker read the probe's
+> stdout and asserted every line it found. When the probe died before printing — a missing
+> dependency is enough — there were no lines, the loop over them ran zero times, every assertion
+> passed vacuously, and it printed *"All five tools return a sentence in all 5 modes"* and exited
+> `0`. It now asserts the **count**: 5 tool lines per mode, or it fails and prints the probe's exit
+> code and last stderr line. A check whose failure mode is silence is worse than no check, because
+> you stop looking.
 
 **See it animated:** the [project page](https://netbox-mcp.vercel.app) runs these paths — a normal
 query, each failure, and *"delete that prefix"* — as a live diagram.

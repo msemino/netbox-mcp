@@ -36,6 +36,9 @@ EXPECTED = {
 HAPPY_EXCEPTIONS = {"list_prefixes": "10.20.30.0/24", "list_vlans": "VLAN30",
                     "prefix_report": "10.20.30.0/24"}
 
+# How many tool lines _probe.py must print per mode. Kept in sync with its CALLS list.
+EXPECTED_TOOLS = 5
+
 
 def _wait_for_port(deadline=5.0):
     end = time.time() + deadline
@@ -68,16 +71,19 @@ def run_mode(mode):
         if stub:
             stub.kill()
             stub.wait()
-    return out.stdout
+    return out
 
 
 def main():
     failures = []
     for mode, expected in EXPECTED.items():
         print(f"\n--- NetBox {mode} ---")
-        for line in run_mode(mode).splitlines():
+        proc = run_mode(mode)
+        seen = 0
+        for line in proc.stdout.splitlines():
             if "|" not in line:
                 continue
+            seen += 1
             tool, _, got = line.partition("|")
             tool, got = tool.strip(), got.strip()
             want = HAPPY_EXCEPTIONS.get(tool, expected) if mode == "200" else expected
@@ -86,12 +92,21 @@ def main():
             if not ok:
                 failures.append((mode, tool, got))
 
+        # A probe that dies before printing anything leaves the loop above with nothing to
+        # iterate, and every assertion passes vacuously. That is how a check reports green
+        # while proving nothing, so the count is asserted rather than assumed.
+        if seen != EXPECTED_TOOLS:
+            detail = (proc.stderr.strip().splitlines() or ["(no stderr)"])[-1]
+            print(f"  FAIL probe reported {seen}/{EXPECTED_TOOLS} tools "
+                  f"(exit {proc.returncode}) — {detail[:100]}")
+            failures.append((mode, f"probe/{seen}-of-{EXPECTED_TOOLS}", detail))
+
     print()
     if failures:
         for mode, tool, got in failures:
             print(f"FAIL {tool} in mode {mode}: {got}")
         return 1
-    print(f"All five tools return a sentence in all {len(EXPECTED)} modes.")
+    print(f"All {EXPECTED_TOOLS} tools return a sentence in all {len(EXPECTED)} modes.")
     return 0
 
 
