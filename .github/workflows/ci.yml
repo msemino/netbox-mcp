@@ -27,8 +27,8 @@ jobs:
       - name: Install
         run: pip install -r requirements.txt
 
-      - name: The server module must import
-        run: python -c "import sys; sys.path.insert(0, 'src'); import server; print('server imports')"
-
+      # No separate import smoke test: server.py reads its configuration at import time and
+      # exits if NETBOX_TOKEN is missing, which is the behaviour you want and the wrong thing
+      # to assert with a bare import. The check below imports it 25 times, with config set.
       - name: Error strings match the README, in every failure mode
         run: python tests/check_error_strings.py
