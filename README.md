@@ -137,13 +137,10 @@ It starts the stub in each mode, calls all five tools against it, and asserts th
 sentence — 25 calls, no NetBox required. It runs on every push
 ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) on Python 3.10 and 3.12.
 
-> **It used to be able to report green while proving nothing.** The checker read the probe's
-> stdout and asserted every line it found. When the probe died before printing — a missing
-> dependency is enough — there were no lines, the loop over them ran zero times, every assertion
-> passed vacuously, and it printed *"All five tools return a sentence in all 5 modes"* and exited
-> `0`. It now asserts the **count**: 5 tool lines per mode, or it fails and prints the probe's exit
-> code and last stderr line. A check whose failure mode is silence is worse than no check, because
-> you stop looking.
+It asserts the **count** as well as the content — 5 tool lines per mode, or it fails and prints
+the probe's exit code and last stderr line. Without that, a probe dying before it prints (a
+missing dependency is enough) leaves nothing to iterate over, every assertion passes vacuously,
+and the checker reports success.
 
 **See it animated:** the [project page](https://netbox-mcp.vercel.app) runs these paths — a normal
 query, each failure, and *"delete that prefix"* — as a live diagram.
